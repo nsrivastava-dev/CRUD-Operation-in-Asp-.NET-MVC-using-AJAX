@@ -1,0 +1,140 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+<body onload="SelectData()">
+    <h1>Student Revision</h1>
+    <form method="post" id="form1">
+        <div id="inputsr"></div>
+        Name :
+        <input type="text" placeholder="Enter Your Name" id="name" name="name" class="form-control" />
+
+        Email :
+        <input type="email" placeholder="Enter Your email" id="email" name="email" class="form-control" />
+
+        Mobile :
+        <input type="number" placeholder="Enter Your Mobile no.." id="mobno" name="mobno" class="form-control" />
+
+        College :
+        <input type="text" placeholder="Enter Your College" id="clg" name="clg" class="form-control" />
+        <br />
+        <input type="button" onclick="demo()" value="Add Now" id="btn" class="form-control text-bg-dark" />
+
+    </form>
+    <br /><br />
+    <table class="table table-bordered" id="table1">
+        <thead>
+            <tr>
+                <th>Sr</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Mobile</th>
+                <th>College</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</body>
+
+<script src="~/Content/Js/jQuery.js"></script>
+<script>
+    function demo() {
+        var sr = document.getElementById("sr").value;
+        var btnval = document.getElementById("btn").value;
+        var name = document.getElementById("name").value;
+        var email = document.getElementById("email").value;
+        var mobno = document.getElementById("mobno").value;
+        var clg = document.getElementById("clg").value;
+        if (btnval == "Add Now") {
+            if (name != "" && mobno != "" && email != "" && clg != "") {
+                $.ajax({
+                    url: '/home/index',
+                    type: 'POST',
+                    data: { "name": name, "email": email, "mobno": mobno, "clg": clg },
+                    success: function (res) {
+                        alert(res);
+                        document.getElementById("form1").reset();
+                        SelectData();
+                    },
+                    error: function () {
+                        alert('Error Occured');
+                    }
+                });
+            }
+            else {
+                alert('Please Fill All the Fields');
+            }
+        }
+        else if (btnval == "Update Now")
+        {
+            
+            if (name != "" && mobno != "" && email != "" && clg != "" && sr!="" ) {
+                $.ajax({
+                    url: '/home/UpdateUser',
+                    type: 'POST',
+                    data: { "name": name, "email": email, "mobno": mobno, "clg": clg, "sr": sr },
+                    success: function (res) {
+                        alert(res);
+                        document.getElementById("form1").reset();
+                        SelectData();
+                        document.getElementById("btn").value = "Add Now";
+                        document.getElementById("sr").style.display="none"
+
+                    },
+                    error: function () {
+                        alert('Error Occured');
+                    }
+                });
+            }
+            else {
+                alert('Some Error Occured On Server');
+            }
+        }
+        
+    }
+    function SelectData()
+    {
+        $.ajax({
+            url: '/home/SelectData',
+            type: 'GET',
+            success: function (data)
+            {
+                if (data.length > 0)
+                {
+                    $("#table1 tbody").empty();
+                    for (var row of data)
+                    {
+                         
+                        $("#table1 tbody").append(
+                            `
+                            <tr>
+                            <td id="tdsr_${row.sr}">${row.sr}</td>
+                            <td id="tdname_${row.sr}">${row.name}</td>
+                            <td id="tdemail_${row.sr}">${row.email}</td>
+                            <td id="tdmobno_${row.sr}">${row.mobno}</td>
+                            <td id="tdclg_${row.sr}">${row.clg}</td>
+                            <td><a onclick='GetOneUserData(${row.sr})'>Update</a> || <a>Delete</a></td>
+                            </tr>
+                            `
+                        );
+                        
+                    }
+                    
+
+                }
+            }
+        });
+    }
+    function GetOneUserData(sr) {
+        /*alert(sr)*/
+        /*alert($("#tdname_" + sr).text());*/
+        document.getElementById("name").value = $("#tdname_" + sr).text();
+        document.getElementById("email").value = $("#tdemail_" + sr).text();
+        document.getElementById("mobno").value = $("#tdmobno_" + sr).text();
+        document.getElementById("clg").value = $("#tdclg_" + sr).text();
+        document.getElementById("btn").value = "Update Now";
+        $("#inputsr").append(`<input type="number"  id="sr" name="sr" class="form-control" readonly />`)
+        document.getElementById("sr").value = $("#tdsr_" + sr).text();
+    }
+
+</script>
